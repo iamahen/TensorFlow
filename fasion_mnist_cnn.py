@@ -85,12 +85,29 @@ def main():
     plt.show()
 
     # Build model
-    in_layer = tf.keras.layers.Flatten(input_shape=(28, 28, 1))
-    layer0 = tf.keras.layers.Dense(units=128, activation=tf.nn.relu)
+    # Todo: CNN
+    layer0_conv_32 = tf.keras.layers.Conv2D(32,
+                                           (3,3),
+                                           padding='same',
+                                           activation=tf.nn.relu,
+                                           input_shape=(28,28,1))
+    layer0_max_pooling = tf.keras.layers.MaxPool2D((2,2), 2)
+    layer1_conv_64 = tf.keras.layers.Conv2D(64,
+                                           (3, 3),
+                                           padding='same',
+                                           activation=tf.nn.relu)
+    layer1_max_pooling = tf.keras.layers.MaxPool2D((2, 2), 2)
+    layer2 = tf.keras.layers.Flatten()
+    layer3 = tf.keras.layers.Dense(units=128, activation=tf.nn.relu)
     out_layer = tf.keras.layers.Dense(units=10, activation=tf.nn.softmax)
-    model = tf.keras.Sequential([in_layer,
-                                 layer0,
+    model = tf.keras.Sequential([layer0_conv_32,
+                                 layer0_max_pooling,
+                                 layer1_conv_64,
+                                 layer1_max_pooling,
+                                 layer2,
+                                 layer3,
                                  out_layer])
+
     model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(),
                   optimizer='adam',
                   metrics=['accuracy'])
@@ -99,7 +116,7 @@ def main():
     train_dataset = train_dataset.repeat().shuffle(num_train_dataset).batch(BATCH_SIZE)
     test_dataset = test_dataset.batch(BATCH_SIZE)
 
-    model.fit(train_dataset, epochs=5, steps_per_epoch=math.ceil(num_train_dataset / BATCH_SIZE))
+    model.fit(train_dataset, epochs=10, steps_per_epoch=math.ceil(num_train_dataset / BATCH_SIZE))
     test_loss, test_accuracy = model.evaluate(test_dataset, steps=math.ceil(num_test_dataset / BATCH_SIZE))
     print("Test results: {}, {}".format(test_loss, test_accuracy))
 
